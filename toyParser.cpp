@@ -42,91 +42,62 @@ const Token* prExpect(Parser &p, TokenType t, string what) {
 }
 
 // -------- Forward decl --------
-void parseExpression(Parser &p);
+void parseS(Parser &p);
 
 // -------- Terminals --------
-void parseVariable(Parser &p) {
-    prAdvance(p);
+void parseA(Parser &p) {
+    if (prCheck(p, TOK_a)) {
+        prAdvance(p);
+    } else {
+        prError(p, "expected a");
+    }
+    while (1) {
+        if (prCheck(p, TOK_a)){
+            prAdvance(p);
+        }
+        else break;
+    }
+    return;  // unreachable
 }
 
-void parseNumber(Parser &p) {
-    prAdvance(p);
+// -------- <term> -> <factor> { (* | /) <factor> } --------
+void parseB(Parser &p) {
+    if (prCheck(p, TOK_b)) {
+        prAdvance(p);
+    } else {
+        prError(p, "expected b");
+    }
+    while (1) {
+        if (prCheck(p, TOK_b)){
+            prAdvance(p);
+        }
+        else break;
+    }
+}
+
+void parseC(Parser &p) {
+    prExpect(p, TOK_c, "c");
 }
 
 // -------- <factor> -> <var> | <const> | ( <expr> ) --------
-void parseFactor(Parser &p) {
-    if (prCheck(p, TOK_LPAREN)) {
-		prAdvance(p);
-        parseExpression(p);
-        prExpect(p, TOK_RPAREN, ")");
+void parseS(Parser &p) {
+    parseA(p);
+    if (prCheck(p, TOK_c)) {
+        parseC(p);
+        parseB(p);
         return;
-    }
-    if (prCheck(p, TOK_NUMBER)) {
-		prAdvance(p);
-		return; 
-	}
-    if (prCheck(p, TOK_VAR)) {
-        parseVariable(p);
-		return;
     }
     prError(p, "expected factor");
     return;  // unreachable
 }
 
-// -------- <term> -> <factor> { (* | /) <factor> } --------
-int parseTerm(Parser &p) {
-	while (1) {
-		parseFactor(p);
-        if (prCheck(p, TOK_STAR) || prCheck(p, TOK_SLASH)) prAdvance(p);
-        else break;
-	}
-}
 
-// -------- <expr> -> <term> { (+ | -) <term> } --------
-void parseExpression(Parser &p) {
-	while (1) {
-		parseTerm(p);
-        if (prCheck(p, TOK_PLUS) || prCheck(p, TOK_MINUS)) prAdvance(p);
-        else break;
-	} 
-}
 
-// -------- <declaration> -> int <var>{, <var>} --------
-void parseDeclaration(Parser& p) {
-	do {
-		prAdvance(p);
-	
-    	parseVariable(p);
-		if (prCheck(p, TOK_ASSIGN)) {
-            prAdvance(p);
-			parseExpression(p);
-		}
-	} while (prCheck(p, TOK_COMMA));
-}
-
-// -------- <assign> -> <var> = <expr> --------
-void parseAssignment(Parser &p) {
-    if (prCheck(p, TOK_VAR)) parseVariable(p);
-    else if (prCheck(p, TOK_NUMBER)) parseNumber(p);
-    else prError(p, "Variable or Number expected");
-    prExpect(p, TOK_ASSIGN, "=");
-    prAdvance(p);
-    parseExpression(p);
-}
-
-// -------- <stmt> -> <assign> | <declaration> --------
-void parseStatement(Parser &p) {
-    if (prCheck(p, TOK_INT))      parseDeclaration(p);
-    else if (prCheck(p, TOK_VAR)) parseAssignment(p);
-    else                          prError(p, "expected statement start with either int or identifier");
-}
 
 // -------- <program> -> <stmt>; {<stmt>;} --------
 void parseProgram(Parser &p) {
 	while (1) {
-		parseStatement(p);
-		//cout << "Expecting semicolon found: " << tokenTypeName(prCurrent(p)->tokenType) << " pos=" << p.pos << "\n";
-		//prExpect(p, TOK_SEMI, "';'");
+		parseS(p);
 		if (prCheck(p, TOK_EOF)) break;
 	}
 	
