@@ -88,7 +88,16 @@ void consumeChar(Tokenizer *tk) {
 /*****************************************************/
 /* skipWhiteSpaces - a function to call peekChar until it
  returns a non-whitespace character */
-
+/* skipWhiteSpaces - a function to call peekChar until it
+returns a non-whitespace character */
+void skipWhiteSpaces(Tokenizer *tk) {
+	while (1) {
+		int c = peekChar(tk);
+		if (c == EOF) return;
+		if (isspace(c)) { consumeChar(tk); continue; }
+		return;
+	}
+}
 /*******************************************************************
 LookupKeyword - a simple lookup code for keywords in the language: */
 TokenType lookupKeywords (int c) {
@@ -110,7 +119,7 @@ TokenType lookupKeywords (int c) {
 int tokenize(Tokenizer *tk, Token *tokens, int maxTokens) {
 	int count = 0;
 	while (1) {
-
+		skipWhiteSpaces(tk);
 		if (count >= maxTokens) errMsg(tk, "too many tokens");
 
 		int c = peekChar(tk);
