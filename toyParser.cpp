@@ -76,7 +76,11 @@ void parseB(Parser &p) {
 }
 
 void parseC(Parser &p) {
-    prExpect(p, TOK_c, "c");
+    if (prCheck(p, TOK_c)) {
+        prAdvance(p);
+    } else {
+        prError(p, "expected c");
+    }
 }
 
 // -------- <factor> -> <var> | <const> | ( <expr> ) --------
@@ -87,8 +91,10 @@ void parseS(Parser &p) {
         parseB(p);
         return;
     }
-    prError(p, "expected factor");
-    return;  // unreachable
+    if (prCheck(p, TOK_EOF)) {
+        return;
+    }
+    prError(p, "expected c or EOF");
 }
 
 
