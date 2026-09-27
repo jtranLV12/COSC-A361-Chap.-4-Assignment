@@ -57,7 +57,6 @@ void parseA(Parser &p) {
         }
         else break;
     }
-    return;  // unreachable
 }
 
 // -------- <term> -> <factor> { (* | /) <factor> } --------
